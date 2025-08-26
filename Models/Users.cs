@@ -19,12 +19,6 @@ namespace AI.Quiz.Function.Models
 
         [Required]
         [MaxLength(100)]
-        [EmailAddress]
-        [Column("email")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        [MaxLength(100)]
         [Column("password")]
         public string Password { get; set; } = string.Empty;
 

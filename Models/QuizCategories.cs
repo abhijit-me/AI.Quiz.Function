@@ -13,8 +13,13 @@ namespace AI.Quiz.Function.Models
         public string Category { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(64)]
+        [MaxLength(50)]
         [Column("description")]
         public string Description { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(16)]
+        [Column("provider")]
+        public string Provider { get; set; } = string.Empty;
     }
 }

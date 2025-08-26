@@ -46,8 +46,7 @@ namespace AI.Quiz.Function.Data
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 
-                // Add unique constraint for email
-                entity.HasIndex(e => e.Email).IsUnique();
+                // Add unique constraint for username
                 entity.HasIndex(e => e.Username).IsUnique();
             });
         }

@@ -74,11 +74,15 @@ namespace AI.Quiz.Function
 
             try
             {
-                // Use SQL Server's NEWID() for random ordering directly in the database
+                // Use raw SQL with NEWID() for proper randomization
+                var sql = @"
+                    SELECT TOP ({0}) [id], [category], [question], [option_a], [option_b], [option_c], [option_d], [option_e], [answer]
+                    FROM [Quiz] 
+                    WHERE [category] = {1}
+                    ORDER BY NEWID()";
+
                 return await _context.Quiz
-                    .Where(q => q.Category == category)
-                    .OrderBy(q => EF.Functions.Random())
-                    .Take(count)
+                    .FromSqlRaw(sql, count, category)
                     .ToListAsync();
             }
             catch (Exception)
