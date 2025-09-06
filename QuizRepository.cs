@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using AI.Quiz.Function.Data;
 using AI.Quiz.Function.Models;
+using System.Security.Principal;
 
 namespace AI.Quiz.Function
 {
@@ -81,9 +82,11 @@ namespace AI.Quiz.Function
                     WHERE [category] = {1}
                     ORDER BY NEWID()";
 
-                return await _context.Quiz
+                var quiz = await _context.Quiz
                     .FromSqlRaw(sql, count, category)
                     .ToListAsync();
+                quiz.ForEach(q => q.Answer = EncodeAnswer(q.Id, q.Answer));
+                return quiz;
             }
             catch (Exception)
             {
@@ -162,6 +165,18 @@ namespace AI.Quiz.Function
                 // Log the exception in a real application
                 return 0;
             }
+        }
+
+        private string EncodeAnswer(int id, string answer)
+        {
+            if (string.IsNullOrEmpty(answer))
+            {
+                return string.Empty;
+            }
+
+            // Simple encoding logic (for demonstration purposes)
+            var bytes = System.Text.Encoding.UTF8.GetBytes(id.ToString() + answer);
+            return Convert.ToBase64String(bytes);
         }
     }
 }

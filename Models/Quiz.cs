@@ -42,7 +42,6 @@ namespace AI.Quiz.Function.Models
         public string? OptionE { get; set; }
 
         [Required]
-        [MaxLength(3)]
         [Column("answer")]
         public string Answer { get; set; } = string.Empty;
     }
