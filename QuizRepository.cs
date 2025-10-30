@@ -20,7 +20,7 @@ namespace AI.Quiz.Function
         /// <param name="username">The username to validate</param>
         /// <param name="password">The password to validate</param>
         /// <returns>True if the user credentials are valid, false otherwise</returns>
-        public async Task<bool> ValidateUser(string username, string password)
+        public async Task<bool?> ValidateUser(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
@@ -37,7 +37,7 @@ namespace AI.Quiz.Function
             catch (Exception)
             {
                 // Log the exception in a real application
-                return false;
+                return null;
             }
         }
 

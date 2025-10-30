@@ -45,11 +45,11 @@ public class QuizQuestions
             }
 
             // Validate user
-            bool isValid = await _quizRepository.ValidateUser(data.Username, data.Password);
+            bool? isValid = await _quizRepository.ValidateUser(data.Username, data.Password);
 
-            return new OkObjectResult(new { 
-                isValid = isValid,
-                message = isValid ? "User validation successful" : "Invalid credentials"
+            return new OkObjectResult(new {
+                isValid,
+                message = isValid == true ? "User validation successful" : (isValid == false ? "Invalid credentials" : "User validation failed")
             });
         }
         catch (JsonException)
