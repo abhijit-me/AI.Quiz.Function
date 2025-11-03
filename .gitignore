@@ -264,3 +264,6 @@ __pycache__/
 *.pyc
 
 .DS_Store
+__blobstorage__
+.gitignore
+__azurite_*

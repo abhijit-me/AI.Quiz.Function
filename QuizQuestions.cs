@@ -133,6 +133,243 @@ public class QuizQuestions
         }
     }
 
+    [Function("GetAllUsers")]
+    public async Task<IActionResult> GetAllUsers([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+    {
+        _logger.LogInformation("GetAllUsers function processed a request.");
+
+        try
+        {
+            var users = await _quizRepository.GetAllUsers();
+            
+            return new OkObjectResult(new { 
+                users = users,
+                count = users.Count
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving users");
+            return new StatusCodeResult(500);
+        }
+    }
+
+    [Function("ChangePassword")]
+    public async Task<IActionResult> ChangePassword([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    {
+        _logger.LogInformation("ChangePassword function processed a request.");
+
+        try
+        {
+            // Read request body
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+
+            if (string.IsNullOrEmpty(requestBody))
+            {
+                return new BadRequestObjectResult(new { error = "Request body is required" });
+            }
+
+            // Parse JSON
+            var data = JsonSerializer.Deserialize<ChangePasswordRequest>(requestBody, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (data == null ||
+                string.IsNullOrWhiteSpace(data.Username) ||
+                string.IsNullOrWhiteSpace(data.OldPassword) ||
+                string.IsNullOrWhiteSpace(data.NewPassword))
+            {
+                return new BadRequestObjectResult(new { error = "Username, old password, and new password are required" });
+            }
+
+            // Change password
+            bool? success = await _quizRepository.ChangePassword(data.Username, data.OldPassword, data.NewPassword);
+
+            if (success == null)
+            {
+                return new StatusCodeResult(500);
+            }
+
+            if (!success.Value)
+            {
+                return new BadRequestObjectResult(new { error = "Invalid username or old password" });
+            }
+
+            return new OkObjectResult(new
+            {
+                success = true,
+                message = "Password changed successfully"
+            });
+        }
+        catch (JsonException)
+        {
+            return new BadRequestObjectResult(new { error = "Invalid JSON format" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing password");
+            return new StatusCodeResult(500);
+        }
+    }
+    
+    [Function("ResetPassword")]
+    public async Task<IActionResult> ResetPassword([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    {
+        _logger.LogInformation("ResetPassword function processed a request.");
+
+        try
+        {
+            // Read request body
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            
+            if (string.IsNullOrEmpty(requestBody))
+            {
+                return new BadRequestObjectResult(new { error = "Request body is required" });
+            }
+
+            // Parse JSON
+            var data = JsonSerializer.Deserialize<ChangePasswordRequest>(requestBody, new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true 
+            });
+
+            if (data == null || 
+                string.IsNullOrWhiteSpace(data.Username) || 
+                string.IsNullOrWhiteSpace(data.NewPassword))
+            {
+                return new BadRequestObjectResult(new { error = "Username and new password are required" });
+            }
+
+            // Reset password
+            bool? success = await _quizRepository.ResetPassword(data.Username, data.NewPassword);
+
+            if (success == null)
+            {
+                return new StatusCodeResult(500);
+            }
+
+            if (!success.Value)
+            {
+                return new BadRequestObjectResult(new { error = "Invalid username" });
+            }
+
+            return new OkObjectResult(new {
+                success = true,
+                message = "Password reset successfully"
+            });
+        }
+        catch (JsonException)
+        {
+            return new BadRequestObjectResult(new { error = "Invalid JSON format" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing password");
+            return new StatusCodeResult(500);
+        }
+    }
+
+    [Function("DeleteUser")]
+    public async Task<IActionResult> DeleteUser([HttpTrigger(AuthorizationLevel.Function, "delete")] HttpRequest req)
+    {
+        _logger.LogInformation("DeleteUser function processed a request.");
+
+        try
+        {
+            // Get username from query parameter
+            string? username = req.Query["username"];
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return new BadRequestObjectResult(new { error = "Username parameter is required" });
+            }
+
+            // Delete user
+            bool? success = await _quizRepository.DeleteUser(username);
+
+            if (success == null)
+            {
+                return new StatusCodeResult(500);
+            }
+
+            if (!success.Value)
+            {
+                return new NotFoundObjectResult(new { error = $"User '{username}' not found" });
+            }
+
+            return new OkObjectResult(new {
+                success = true,
+                message = $"User '{username}' deleted successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting user");
+            return new StatusCodeResult(500);
+        }
+    }
+
+    [Function("CreateUser")]
+    public async Task<IActionResult> CreateUser([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    {
+        _logger.LogInformation("CreateUser function processed a request.");
+
+        try
+        {
+            // Read request body
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            
+            if (string.IsNullOrEmpty(requestBody))
+            {
+                return new BadRequestObjectResult(new { error = "Request body is required" });
+            }
+
+            // Parse JSON
+            var data = JsonSerializer.Deserialize<CreateUserRequest>(requestBody, new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true 
+            });
+
+            if (data == null || 
+                string.IsNullOrWhiteSpace(data.Username) || 
+                string.IsNullOrWhiteSpace(data.Password))
+            {
+                return new BadRequestObjectResult(new { error = "Username and password are required" });
+            }
+
+            // Create user object
+            var newUser = new Models.Users
+            {
+                Username = data.Username,
+                Password = data.Password
+            };
+
+            // Create user
+            var createdUser = await _quizRepository.CreateUser(newUser);
+
+            if (createdUser == null)
+            {
+                return new BadRequestObjectResult(new { error = "User creation failed. Username may already exist." });
+            }
+
+            return new OkObjectResult(new {
+                success = true,
+                message = "User created successfully",
+                user = createdUser
+            });
+        }
+        catch (JsonException)
+        {
+            return new BadRequestObjectResult(new { error = "Invalid JSON format" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating user");
+            return new StatusCodeResult(500);
+        }
+    }
+
     [Function("QuizQuestions")]
     public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
     {
@@ -143,6 +380,19 @@ public class QuizQuestions
 
 // Request models
 public class ValidateUserRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class ChangePasswordRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string OldPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+}
+
+public class CreateUserRequest
 {
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
