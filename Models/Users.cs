@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI.Quiz.Function.Models
 {
-    [Table("Users")]
-    public class Users
+    [Table("Users", Schema = "Quiz")]
+    public class User
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI.Quiz.Function.Models
 {
-    [Table("Quiz")]
-    public class Quiz
+    [Table("Questions", Schema = "Quiz")]
+    public class QuizQuestion
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

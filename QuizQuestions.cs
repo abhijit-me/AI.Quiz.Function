@@ -339,7 +339,7 @@ public class QuizQuestions
             }
 
             // Create user object
-            var newUser = new Models.Users
+            var newUser = new Models.User
             {
                 Username = data.Username,
                 Password = data.Password

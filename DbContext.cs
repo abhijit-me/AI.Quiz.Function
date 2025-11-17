@@ -10,37 +10,37 @@ namespace AI.Quiz.Function.Data
         }
 
         // DbSets for each entity
-        public DbSet<Models.Quiz> Quiz { get; set; }
-        public DbSet<QuizCategories> QuizCategories { get; set; }
-        public DbSet<Users> Users { get; set; }
+        public DbSet<QuizQuestion> Questions { get; set; }
+        public DbSet<QuizCategory> Categories { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Quiz entity
-            modelBuilder.Entity<Models.Quiz>(entity =>
+            // Configure QuizQuestion entity
+            modelBuilder.Entity<QuizQuestion>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 
                 // Configure relationships if needed
-                // Example: Foreign key relationship with QuizCategories
-                entity.HasOne<QuizCategories>()
+                // Example: Foreign key relationship with Categories
+                entity.HasOne<QuizCategory>()
                       .WithMany()
                       .HasForeignKey(q => q.Category)
                       .HasPrincipalKey(qc => qc.Category)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Configure QuizCategories entity
-            modelBuilder.Entity<QuizCategories>(entity =>
+            // Configure QuizCategory entity
+            modelBuilder.Entity<QuizCategory>(entity =>
             {
                 entity.HasKey(e => e.Category);
             });
 
-            // Configure Users entity
-            modelBuilder.Entity<Users>(entity =>
+            // Configure User entity
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();

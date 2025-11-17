@@ -45,18 +45,18 @@ namespace AI.Quiz.Function
         /// Gets all quiz categories from the database
         /// </summary>
         /// <returns>A list of all quiz categories</returns>
-        public async Task<List<QuizCategories>> GetAllQuizCategories()
+        public async Task<List<QuizCategory>> GetAllQuizCategories()
         {
             try
             {
-                return await _context.QuizCategories
+                return await _context.Categories
                     .OrderBy(qc => qc.Category)
                     .ToListAsync();
             }
             catch (Exception)
             {
                 // Log the exception in a real application
-                return new List<QuizCategories>();
+                return new List<QuizCategory>();
             }
         }
 
@@ -66,11 +66,11 @@ namespace AI.Quiz.Function
         /// <param name="category">The category to filter by</param>
         /// <param name="count">The number of random questions to return</param>
         /// <returns>A list of random quiz questions for the specified category</returns>
-        public async Task<List<Models.Quiz>> GetQuizByCategory(string category, int count)
+        public async Task<List<QuizQuestion>> GetQuizByCategory(string category, int count)
         {
             if (string.IsNullOrWhiteSpace(category) || count <= 0)
             {
-                return new List<Models.Quiz>();
+                return new List<QuizQuestion>();
             }
 
             try
@@ -78,11 +78,11 @@ namespace AI.Quiz.Function
                 // Use raw SQL with NEWID() for proper randomization
                 var sql = @"
                     SELECT TOP ({0}) [id], [category], [question], [option_a], [option_b], [option_c], [option_d], [option_e], [answer]
-                    FROM [Quiz] 
+                    FROM [Quiz].[Questions] 
                     WHERE [category] = {1}
                     ORDER BY NEWID()";
 
-                var quiz = await _context.Quiz
+                var quiz = await _context.Questions
                     .FromSqlRaw(sql, count, category)
                     .ToListAsync();
                 quiz.ForEach(q => q.Answer = EncodeAnswer(q.Id, q.Answer));
@@ -91,7 +91,7 @@ namespace AI.Quiz.Function
             catch (Exception)
             {
                 // Log the exception in a real application
-                return new List<Models.Quiz>();
+                return new List<QuizQuestion>();
             }
         }
 
@@ -100,7 +100,7 @@ namespace AI.Quiz.Function
         /// </summary>
         /// <param name="username">The username to search for</param>
         /// <returns>The user if found, null otherwise</returns>
-        public async Task<Users?> GetUserByUsername(string username)
+        public async Task<User?> GetUserByUsername(string username)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -133,7 +133,7 @@ namespace AI.Quiz.Function
 
             try
             {
-                return await _context.QuizCategories
+                return await _context.Categories
                     .AnyAsync(qc => qc.Category == category);
             }
             catch (Exception)
@@ -157,7 +157,7 @@ namespace AI.Quiz.Function
 
             try
             {
-                return await _context.Quiz
+                return await _context.Questions
                     .CountAsync(q => q.Category == category);
             }
             catch (Exception)
@@ -171,7 +171,7 @@ namespace AI.Quiz.Function
         /// Gets all users from the database with passwords removed for security
         /// </summary>
         /// <returns>A list of all users with empty password fields</returns>
-        public async Task<List<Users>> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
             try
             {
@@ -185,7 +185,7 @@ namespace AI.Quiz.Function
             catch (Exception)
             {
                 // Log the exception in a real application
-                return new List<Users>();
+                return new List<User>();
             }
         }
 
@@ -302,7 +302,7 @@ namespace AI.Quiz.Function
         /// </summary>
         /// <param name="user">The user object to create</param>
         /// <returns>The created user with password cleared, null if creation failed</returns>
-        public async Task<Users?> CreateUser(Users user)
+        public async Task<User?> CreateUser(User user)
         {
             if (user == null || 
                 string.IsNullOrWhiteSpace(user.Username) || 

@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI.Quiz.Function.Models
 {
-    [Table("QuizCategories")]
-    public class QuizCategories
+    [Table("Categories", Schema = "Quiz")]
+    public class QuizCategory
     {
 
         [Key]

@@ -263,7 +263,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-.DS_Store
+# Azure Storage Emulator
 __blobstorage__
-.gitignore
 __azurite_*
